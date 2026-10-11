@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="p-5 mb-4 bg-light rounded-3 border shadow-sm">
+    <div class="container-fluid py-3">
+        <h1 class="display-5 fw-bold text-dark"><i class="bi bi-shield-check text-success me-2"></i>Production-Grade Security Baseline</h1>
+        <p class="col-md-10 fs-4 text-secondary">
+            This ASP.NET Core MVC application is configured with OWASP Top 10 (2021) and ASVS security controls, including Central Package Management (CPM), LibMan client-side asset governance, and dynamic CSP nonces.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="bi bi-box-seam me-2"></i>Central Package Management</h5>
+                <p class="card-text">All NuGet package versions are strictly pinned and managed via <code>Directory.Packages.props</code>. Project files contain zero <code>Version</code> attributes.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-success"><i class="bi bi-shield-shaded me-2"></i>Dynamic CSP & Nonce</h5>
+                <p class="card-text">Every HTTP response receives a cryptographically generated CSP nonce ensuring script/style execution without using 'unsafe-inline'.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-warning"><i class="bi bi-person-lock me-2"></i>Strict Identity & Cookies</h5>
+                <p class="card-text">Identity configured with strict password complexity, account lockout policies, and pre-seeded default site admin user.</p>
+            </div>
+        </div>
+    </div>
+</div>
