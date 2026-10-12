@@ -11,15 +11,18 @@ public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IAuditLogger _auditLogger;
 
     public AccountController(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
         IAuditLogger auditLogger)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _roleManager = roleManager;
         _auditLogger = auditLogger;
     }
 
@@ -112,6 +115,72 @@ public class AccountController : Controller
             false).ConfigureAwait(false);
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        return View(model);
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Register()
+    {
+        return View(new RegisterViewModel());
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.Email,
+            Email = model.Email,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Department = "Unassigned", // Non-department user self-registration
+            EmailConfirmed = true,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        IdentityResult result = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
+
+        if (result.Succeeded)
+        {
+            const string userRole = "User";
+            if (!await _roleManager.RoleExistsAsync(userRole).ConfigureAwait(false))
+            {
+                await _roleManager.CreateAsync(new ApplicationRole { Name = userRole }).ConfigureAwait(false);
+            }
+
+            await _userManager.AddToRoleAsync(user, userRole).ConfigureAwait(false);
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = HttpContext.Request.Headers.UserAgent.ToString();
+
+            await _auditLogger.LogSecurityEventAsync(
+                "ANONYMOUS_USER_REGISTERED",
+                user.Id,
+                user.UserName,
+                ipAddress,
+                userAgent,
+                $"Anonymous user self-registered: {model.Email}",
+                true).ConfigureAwait(false);
+
+            await _signInManager.SignInAsync(user, isPersistent: false).ConfigureAwait(false);
+            return RedirectToAction("Index", "Home");
+        }
+
+        foreach (IdentityError error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
         return View(model);
     }
 

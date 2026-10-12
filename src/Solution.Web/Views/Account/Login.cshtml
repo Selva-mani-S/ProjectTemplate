@@ -10,6 +10,7 @@
                 <h3 class="card-title text-center mb-4"><i class="bi bi-person-circle me-2 text-primary"></i>Sign In</h3>
 
                 <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                     <div class="form-floating mb-3">
@@ -30,6 +31,11 @@
                     </div>
 
                     <button type="submit" class="w-100 btn btn-lg btn-primary mb-3">Log in</button>
+
+                    <div class="text-center">
+                        <span class="text-muted">Don't have an account?</span>
+                        <a asp-controller="Account" asp-action="Register" class="text-decoration-none fw-bold ms-1">Register here</a>
+                    </div>
                 </form>
             </div>
         </div>
