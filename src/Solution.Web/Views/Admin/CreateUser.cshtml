@@ -1,0 +1,77 @@
+@model Solution.Web.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Create New User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-body p-4">
+                <h3 class="card-title fw-bold text-dark mb-4">
+                    <i class="bi bi-person-plus-fill text-primary me-2"></i>Create New User
+                </h3>
+
+                <form asp-controller="Admin" asp-action="CreateUser" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-bold"></label>
+                            <input asp-for="FirstName" class="form-control" placeholder="John" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-bold"></label>
+                            <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-bold"></label>
+                        <input asp-for="Email" class="form-control" placeholder="user@company.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Department" class="form-label fw-bold"></label>
+                        <input asp-for="Department" class="form-control" placeholder="e.g. Engineering, Finance, Operations" />
+                        <span asp-validation-for="Department" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label fw-bold"></label>
+                        <select asp-for="Role" class="form-select">
+                            <option value="User">User</option>
+                            <option value="Administrator">Administrator</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label fw-bold"></label>
+                        <input asp-for="Password" class="form-control" placeholder="Temporary Strong Password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                        <div class="form-text">Must be at least 12 characters and contain digits, uppercase, lowercase, and special characters.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to User List
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i>Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/jquery-validate/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

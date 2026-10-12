@@ -17,15 +17,30 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=BaselineSecureDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+        ArgumentNullException.ThrowIfNull(configuration);
 
-        // DbContexts isolation: Separate IdentityDbContext and AppDbContext with InMemory database for dev/testing when SQL Server LocalDB isn't available
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseInMemoryDatabase("BaselineSecureDb"));
+        bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
 
-        services.AddDbContext<AppIdentityDbContext>(options =>
-            options.UseInMemoryDatabase("BaselineSecureIdentityDb"));
+        // On Linux sandboxes where SQL Server LocalDB driver is unsupported, use InMemoryDatabase
+        if (isLinux)
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase("BaselineSecureDb"));
+
+            services.AddDbContext<AppIdentityDbContext>(options =>
+                options.UseInMemoryDatabase("BaselineSecureIdentityDb"));
+        }
+        else
+        {
+            var defaultConnectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? "Server=(localdb)\\mssqllocaldb;Database=BaselineSecureDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(defaultConnectionString));
+
+            services.AddDbContext<AppIdentityDbContext>(options =>
+                options.UseSqlServer(defaultConnectionString));
+        }
 
         // Data Protection API: Key persistence in Database
         services.AddDataProtection()
