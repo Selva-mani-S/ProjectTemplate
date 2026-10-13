@@ -1,0 +1,138 @@
+@model Solution.Web.Models.UserManagementViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Department User Management</h2>
+        <p class="text-muted mb-0">Manage users and assign department-level access controls.</p>
+    </div>
+    <a asp-controller="Admin" asp-action="CreateUser" class="btn btn-primary shadow-sm">
+        <i class="bi bi-person-plus-fill me-1"></i> Add New User
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-white rounded">
+        <form method="get" asp-controller="Admin" asp-action="Index" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="departmentFilter" class="col-form-label fw-bold">Filter by Department:</label>
+            </div>
+            <div class="col-auto">
+                <select id="departmentFilter" name="departmentFilter" class="form-select">
+                    <option value="">-- All Departments --</option>
+                    @foreach (var dept in Model.AvailableDepartments)
+                    {
+                        <option value="@dept" selected="@(dept == Model.SelectedDepartmentFilter)">@dept</option>
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-filter me-1"></i>Filter</button>
+                @if (!string.IsNullOrEmpty(Model.SelectedDepartmentFilter))
+                {
+                    <a asp-controller="Admin" asp-action="Index" class="btn btn-link text-decoration-none">Clear</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">User</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Email Confirmed</th>
+                        <th>Created</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Users.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>No users found matching the selected criteria.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-bold">@user.FirstName @user.LastName</div>
+                                    <div class="small text-muted">@user.Email</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark fw-normal px-2 py-1">@user.Department</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary fw-normal px-2 py-1">@user.Roles</span>
+                                </td>
+                                <td>
+                                    @if (user.EmailConfirmed)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pending</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">@user.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                                <td class="text-end pe-3">
+                                    <!-- Edit Department Modal Trigger -->
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editDeptModal-@user.Id">
+                                        <i class="bi bi-pencil-square me-1"></i>Edit Dept
+                                    </button>
+
+                                    <!-- Edit Department Modal -->
+                                    <div class="modal fade text-start" id="editDeptModal-@user.Id" tabindex="-1" aria-labelledby="editDeptModalLabel-@user.Id" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form asp-controller="Admin" asp-action="UpdateDepartment" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="UserId" value="@user.Id" />
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editDeptModalLabel-@user.Id">Update Department - @user.Email</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Department Name</label>
+                                                            <input type="text" name="Department" value="@user.Department" class="form-control" required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

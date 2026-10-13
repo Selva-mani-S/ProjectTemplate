@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h2 class="card-title text-dark"><i class="bi bi-file-earmark-lock me-2"></i>Security Policy & Data Protection</h2>
+        <p class="card-text">
+            This application respects user data privacy and enforces end-to-end security measures in compliance with OWASP guidelines.
+        </p>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Anti-Forgery:</strong> Global AutoValidateAntiforgeryToken applied to all state-changing endpoints.</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Audit Logging:</strong> Sensitive security actions are recorded without storing raw credentials or unencrypted PII.</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Data Protection:</strong> Encrypted key rings stored using Entity Framework Core key persistence.</li>
+        </ul>
+    </div>
+</div>
