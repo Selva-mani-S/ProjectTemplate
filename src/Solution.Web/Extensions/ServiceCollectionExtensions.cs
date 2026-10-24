@@ -10,6 +10,7 @@ using Solution.Application.Common.Interfaces;
 using Solution.Infrastructure.Identity;
 using Solution.Infrastructure.Logging;
 using Solution.Infrastructure.Persistence;
+using Solution.Infrastructure.Services;
 
 public static class ServiceCollectionExtensions
 {
@@ -20,9 +21,9 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
+        bool useInMemory = configuration.GetValue<bool>("UseInMemoryDatabase") || isLinux;
 
-        // On Linux sandboxes where SQL Server LocalDB driver is unsupported, use InMemoryDatabase
-        if (isLinux)
+        if (useInMemory)
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase("BaselineSecureDb"));
@@ -73,9 +74,9 @@ public static class ServiceCollectionExtensions
             options.Lockout.AllowedForNewUsers = true;
 
             // User & Sign-In settings
-            options.User.RequireUniqueEmail = true;
-            options.SignIn.RequireConfirmedEmail = true;
-            options.SignIn.RequireConfirmedAccount = true;
+            options.User.RequireUniqueEmail = false;
+            options.SignIn.RequireConfirmedEmail = false;
+            options.SignIn.RequireConfirmedAccount = false;
         })
         .AddEntityFrameworkStores<AppIdentityDbContext>()
         .AddDefaultTokenProviders();
@@ -115,6 +116,18 @@ public static class ServiceCollectionExtensions
             // Apply AutoValidateAntiforgeryToken globally
             options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        services.AddScoped<IMemberService, MemberService>();
+        services.AddScoped<IImportService, ImportService>();
+        services.AddScoped<IReunionService, ReunionService>();
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IReportService, ReportService>();
 
         return services;
     }

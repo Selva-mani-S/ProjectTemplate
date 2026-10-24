@@ -1,62 +1,77 @@
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="p-5 mb-4 bg-white rounded-3 border shadow-sm">
-    <div class="container-fluid py-2">
-        <h1 class="display-5 fw-bold text-dark mb-3">
-            <i class="bi bi-shield-check text-success me-2"></i>Production-Grade Security Baseline
-        </h1>
-        <p class="col-md-10 fs-5 text-secondary">
-            Welcome to the Secure Baseline Portal. This application serves as a dedicated home screen enforcing strict OWASP Top 10 (2021) controls, Central Package Management (CPM), LibMan client-side governance, and ASP.NET Core Identity.
-        </p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border border-secondary border-opacity-25 text-center">
+            <div class="mb-3">
+                <i class="bi bi-airplane-engines text-primary" style="font-size: 3.5rem;"></i>
+            </div>
+            <h1 class="display-5 fw-bold text-dark">Indian Air Force Batch 1986</h1>
+            <p class="lead text-muted fs-4">Grand 40-Year Reunion & Member Registry Portal</p>
+            <p class="text-secondary max-w-75 mx-auto">
+                Welcome veterans, spouses, and families. This portal enables all IAF Batch 1986 course members to maintain their registry details, submit reunion travel and accommodation preferences, confirm event fee payments, and receive official event announcements.
+            </p>
 
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="mt-4 p-3 bg-light rounded border">
-                <h5 class="fw-bold text-primary mb-2"><i class="bi bi-person-badge-fill me-2"></i>Authenticated Dashboard</h5>
-                <p class="mb-2">Logged in as <strong>@User.Identity.Name</strong></p>
-                @if (User.IsInRole("Administrator"))
+            <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a asp-controller="Admin" asp-action="Index" class="btn btn-primary shadow-sm">
-                        <i class="bi bi-people-fill me-2"></i>Manage Department Users
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-controller="Dashboard" asp-action="Admin" class="btn btn-primary btn-lg px-4 gap-3 shadow-sm">
+                            <i class="bi bi-speedometer2 me-2"></i>Go to Admin Dashboard
+                        </a>
+                        <a asp-controller="MemberRegistry" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                            <i class="bi bi-person-lines-fill me-2"></i>Member Registry
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Dashboard" asp-action="Member" class="btn btn-primary btn-lg px-4 gap-3 shadow-sm">
+                            <i class="bi bi-house-door me-2"></i>My Reunion Dashboard
+                        </a>
+                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-warning btn-lg px-4 shadow-sm">
+                            <i class="bi bi-calendar-check me-2"></i>Register for Reunion
+                        </a>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-5 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login to Your Account
                     </a>
                 }
             </div>
-        }
-        else
-        {
-            <div class="mt-4">
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg shadow-sm">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Portal
-                </a>
-            </div>
-        }
-    </div>
-</div>
+        </div>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 bg-white">
-            <div class="card-body">
-                <h5 class="card-title text-primary"><i class="bi bi-box-seam me-2"></i>Central Package Management</h5>
-                <p class="card-text">All NuGet package versions are strictly pinned and managed via <code>Directory.Packages.props</code>. Project files contain zero <code>Version</code> attributes.</p>
+        <div class="row g-4 py-2">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary">
+                    <div class="card-body p-4 text-center">
+                        <div class="text-primary mb-3"><i class="bi bi-person-badge fs-1"></i></div>
+                        <h4 class="fw-bold">Member Registry</h4>
+                        <p class="text-muted small">Comprehensive database of all IAF 1986 batch comrades, trades, postings, and family records.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 bg-white">
-            <div class="card-body">
-                <h5 class="card-title text-success"><i class="bi bi-shield-shaded me-2"></i>Dynamic CSP & Nonce</h5>
-                <p class="card-text">Every HTTP response receives a cryptographically generated CSP nonce ensuring script/style execution without using 'unsafe-inline'.</p>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning">
+                    <div class="card-body p-4 text-center">
+                        <div class="text-warning mb-3"><i class="bi bi-compass fs-1"></i></div>
+                        <h4 class="fw-bold">Event & Travel Logistics</h4>
+                        <p class="text-muted small">Submit arrival times, transit points, accommodation requirements, T-shirt size, and catering preferences.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 bg-white">
-            <div class="card-body">
-                <h5 class="card-title text-warning"><i class="bi bi-people-fill me-2"></i>Department User Management</h5>
-                <p class="card-text">Site administrators can manage department-level user accounts and roles via a dedicated admin portal screen.</p>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-4 border-success">
+                    <div class="card-body p-4 text-center">
+                        <div class="text-success mb-3"><i class="bi bi-shield-check fs-1"></i></div>
+                        <h4 class="fw-bold">Fee Verification</h4>
+                        <p class="text-muted small">Transparent fee tracking with member self-reporting, payment proof submission, and organizer verification audit.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

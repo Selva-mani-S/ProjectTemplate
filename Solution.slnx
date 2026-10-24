@@ -1,8 +1,14 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Solution.Application/Solution.Application.csproj" />
     <Project Path="src/Solution.Domain/Solution.Domain.csproj" />
     <Project Path="src/Solution.Infrastructure/Solution.Infrastructure.csproj" />
     <Project Path="src/Solution.Web/Solution.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Solution.Tests/Solution.Tests.csproj" />
   </Folder>
 </Solution>

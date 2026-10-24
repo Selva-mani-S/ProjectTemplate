@@ -1,0 +1,224 @@
+@model Solution.Web.Models.PaymentSubmissionViewModel
+@{
+    ViewData["Title"] = "Reunion Fee Payment";
+    var cspNonce = Context.Items[Solution.Web.Middleware.SecurityHeadersMiddleware.CspNonceKey]?.ToString() ?? string.Empty;
+    var existing = Model.ExistingPayment;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <!-- Event Fee Header -->
+        <div class="card border-0 shadow-sm mb-4 bg-primary text-white">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <span class="badge bg-warning text-dark px-3 py-2 mb-2 fw-bold text-uppercase">Reunion Fee Collection</span>
+                        <h2 class="fw-bold mb-1">@Model.EventTitle</h2>
+                        <p class="mb-0 text-white-50">
+                            Member: <strong>@Model.MemberName</strong> &bull; Service No: <strong>@Model.ServiceNo</strong>
+                        </p>
+                    </div>
+                    <div class="text-lg-end">
+                        <div class="small text-white-50">Configured Fee Amount</div>
+                        <div class="fs-3 fw-bold">₹@Model.ConfiguredFeeAmount.ToString("N0")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Status Banner -->
+        @if (existing != null)
+        {
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Current Payment Status</h5>
+                    <div class="d-flex align-items-center gap-3">
+                        @switch (existing.PaymentStatus)
+                        {
+                            case Solution.Domain.Enums.PaymentStatus.Verified:
+                                <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-patch-check-fill me-1"></i>Verified / Paid</span>
+                                <div class="text-success small">
+                                    Your payment of <strong>₹@existing.AmountPaid.ToString("N2")</strong> was verified by <strong>@(existing.VerifiedBy ?? "Administrator")</strong> on @(existing.VerifiedAtUtc?.ToString("dd MMM yyyy") ?? "").
+                                </div>
+                                break;
+                            case Solution.Domain.Enums.PaymentStatus.PendingVerification:
+                            case Solution.Domain.Enums.PaymentStatus.PaymentDetailsSubmitted:
+                                <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="bi bi-hourglass-split me-1"></i>Pending Verification</span>
+                                <div class="text-muted small">
+                                    Your payment details have been submitted and are awaiting verification by the reunion organizers.
+                                </div>
+                                break;
+                            case Solution.Domain.Enums.PaymentStatus.Rejected:
+                                <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-x-circle-fill me-1"></i>Verification Rejected</span>
+                                <div class="text-danger small">
+                                    <strong>Reason for Rejection:</strong> @(string.IsNullOrWhiteSpace(existing.RejectionReason) ? "Payment reference could not be matched." : existing.RejectionReason)
+                                    <div class="mt-1 text-dark">Please review your transaction details, attach a clear screenshot or receipt, and resubmit below.</div>
+                                </div>
+                                break;
+                            default:
+                                <span class="badge bg-secondary px-3 py-2 fs-6">Unpaid</span>
+                                <div class="text-muted small">You have not submitted payment confirmation for this event yet.</div>
+                                break;
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(existing.PaymentProofPath))
+                    {
+                        <div class="mt-3 pt-2 border-top">
+                            <span class="small text-muted me-2">Uploaded Proof Document:</span>
+                            <a asp-action="Proof" asp-route-id="@existing.PaymentId" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-check me-1"></i>View Uploaded Proof
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Payment Submission Form -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-cash-stack me-2 text-primary"></i>Payment Confirmation Form</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="EventId" />
+                    <input type="hidden" asp-for="EventTitle" />
+                    <input type="hidden" asp-for="ConfiguredFeeAmount" />
+                    <input type="hidden" asp-for="ServiceNo" />
+                    <input type="hidden" asp-for="MemberName" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Have you paid question -->
+                    <div class="mb-4 p-3 bg-light rounded-3 border">
+                        <label class="form-label fw-bold fs-6 mb-2 text-dark">
+                            <i class="bi bi-question-circle-fill text-primary me-2"></i>Have you paid the reunion fee?
+                        </label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check fs-6">
+                                <input class="form-check-input" type="radio" asp-for="HasPaidResponse" value="Yes" id="paidYes" />
+                                <label class="form-check-label fw-bold text-success" for="paidYes">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Yes, I have paid.
+                                </label>
+                            </div>
+                            <div class="form-check fs-6">
+                                <input class="form-check-input" type="radio" asp-for="HasPaidResponse" value="No" id="paidNo" />
+                                <label class="form-check-label fw-bold text-muted" for="paidNo">
+                                    <i class="bi bi-x-circle me-1"></i>No, I have not paid yet.
+                                </label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="HasPaidResponse" class="text-danger small"></span>
+                        <div class="form-text small mt-2">
+                            If you select <strong>No</strong>, your status will remain Unpaid. You can come back and submit payment details at any time before the deadline.
+                        </div>
+                    </div>
+
+                    <!-- Payment details form (toggled by Yes) -->
+                    <div id="paymentDetailsSection" class="@(Model.HasPaidResponse == "Yes" ? "" : "d-none")">
+                        <div class="alert alert-info py-2 small mb-4">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            <strong>Verification Note:</strong> Submitting payment details does not automatically mark payment as verified. An organizer will confirm receipt against bank/UPI statements.
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PaymentMode" class="form-label fw-bold small"></label>
+                                <select asp-for="PaymentMode" class="form-select" id="paymentModeSelect">
+                                    <option value="UPI">UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
+                                    <option value="BankTransfer">Bank Transfer (NEFT / RTGS / IMPS)</option>
+                                    <option value="Cash">Cash (Paid to Organizer directly)</option>
+                                    <option value="Cheque">Cheque / Demand Draft</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="PaymentMode" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AmountPaid" class="form-label fw-bold small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input asp-for="AmountPaid" type="number" step="0.01" class="form-control" />
+                                </div>
+                                <span asp-validation-for="AmountPaid" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6" id="ackNumberContainer">
+                                <label asp-for="AcknowledgementNumber" class="form-label fw-bold small" id="ackNumberLabel">Acknowledgement / Transaction Number</label>
+                                <input asp-for="AcknowledgementNumber" class="form-control font-monospace" placeholder="e.g. UPI Ref / UTR / Cheque No" />
+                                <span asp-validation-for="AcknowledgementNumber" class="text-danger small"></span>
+                                <div class="form-text small" id="ackHelpText">Enter the UPI transaction ID or Bank UTR reference.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PaymentDate" class="form-label fw-bold small"></label>
+                                <input asp-for="PaymentDate" type="date" class="form-control" />
+                                <span asp-validation-for="PaymentDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PaymentProofFile" class="form-label fw-bold small"></label>
+                            <input asp-for="PaymentProofFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.pdf" />
+                            <span asp-validation-for="PaymentProofFile" class="text-danger small"></span>
+                            <div class="form-text small">Upload screenshot of UPI payment, bank receipt, or deposit slip (JPG, PNG, PDF up to 10 MB).</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="AdditionalRemarks" class="form-label fw-bold small"></label>
+                            <textarea asp-for="AdditionalRemarks" class="form-control" rows="2" placeholder="Optional comments regarding payment (e.g. Paid from spouse's Google Pay account)..."></textarea>
+                            <span asp-validation-for="AdditionalRemarks" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Registration Form
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold px-4">
+                            <i class="bi bi-check2-circle me-1"></i>Submit Payment Confirmation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script nonce="@cspNonce">
+        document.addEventListener('DOMContentLoaded', function () {
+            var paidYes = document.getElementById('paidYes');
+            var paidNo = document.getElementById('paidNo');
+            var detailsSection = document.getElementById('paymentDetailsSection');
+            var modeSelect = document.getElementById('paymentModeSelect');
+            var ackHelpText = document.getElementById('ackHelpText');
+
+            function toggleSection() {
+                if (paidYes.checked) {
+                    detailsSection.classList.remove('d-none');
+                } else {
+                    detailsSection.classList.add('d-none');
+                }
+            }
+
+            function handleModeChange() {
+                var mode = modeSelect.value;
+                if (mode === 'Cash') {
+                    ackHelpText.textContent = 'Optional for cash payment (receipt number if given by organizer).';
+                } else if (mode === 'Cheque') {
+                    ackHelpText.textContent = 'Enter cheque number, bank name, and branch.';
+                } else {
+                    ackHelpText.textContent = 'Enter the UPI transaction ID or Bank UTR reference.';
+                }
+            }
+
+            paidYes.addEventListener('change', toggleSection);
+            paidNo.addEventListener('change', toggleSection);
+            modeSelect.addEventListener('change', handleModeChange);
+            handleModeChange();
+        });
+    </script>
+}

@@ -1,0 +1,265 @@
+@model Solution.Web.Models.MemberAccountListViewModel
+@{
+    ViewData["Title"] = "Member Account Management";
+    var cspNonce = Context.Items[Solution.Web.Middleware.SecurityHeadersMiddleware.CspNonceKey]?.ToString() ?? string.Empty;
+
+    int totalMembers = Model.Accounts.Count;
+    int withAccounts = Model.Accounts.Count(a => a.HasAccount);
+    int activatedCount = Model.Accounts.Count(a => a.IsActivated);
+    int pendingCount = Model.Accounts.Count(a => a.HasAccount && !a.IsActivated);
+    int withoutAccounts = totalMembers - withAccounts;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Member User Accounts</h2>
+        <p class="text-muted small mb-0">Manage login credentials, activation links, and access status for Batch 1986 veterans.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form asp-action="BulkProvisionAccounts" method="post" onsubmit="return confirm('Are you sure you want to bulk generate accounts for all members without an account?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-primary" @(withoutAccounts == 0 ? "disabled" : "")>
+                <i class="bi bi-person-plus-fill me-1"></i>Bulk Generate Accounts (@withoutAccounts remaining)
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Metric summary cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-white p-3">
+            <span class="text-muted small fw-bold text-uppercase">Total Members</span>
+            <h3 class="fw-bold mb-0 text-dark">@totalMembers</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-white p-3">
+            <span class="text-muted small fw-bold text-uppercase">Accounts Provisioned</span>
+            <h3 class="fw-bold mb-0 text-primary">@withAccounts</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-white p-3">
+            <span class="text-muted small fw-bold text-uppercase">Activated (Password Set)</span>
+            <h3 class="fw-bold mb-0 text-success">@activatedCount</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-white p-3">
+            <span class="text-muted small fw-bold text-uppercase">Pending Activation</span>
+            <h3 class="fw-bold mb-0 text-warning">@pendingCount</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Accounts Table Card -->
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Service No</th>
+                    <th>Member Name</th>
+                    <th>Mobile</th>
+                    <th>Trade</th>
+                    <th>Email / Username</th>
+                    <th>Account Status</th>
+                    <th>Last Login</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Accounts.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                            No members found. Please import members from the Member Registry.
+                        </td>
+                    </tr>
+                }
+                @foreach (var acc in Model.Accounts)
+                {
+                    <tr>
+                        <td class="fw-bold">@acc.ServiceNo</td>
+                        <td>@acc.MemberName</td>
+                        <td>@(acc.MobileNo ?? "—")</td>
+                        <td><span class="badge bg-secondary">@(acc.TradeName ?? "—")</span></td>
+                        <td>
+                            @if (acc.HasAccount)
+                            {
+                                <span class="font-monospace small">@acc.Email</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">No account</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!acc.HasAccount)
+                            {
+                                <span class="badge bg-secondary">Not Created</span>
+                            }
+                            else if (!acc.IsActive)
+                            {
+                                <span class="badge bg-danger">Deactivated</span>
+                            }
+                            else if (acc.IsActivated)
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending Activation</span>
+                            }
+                        </td>
+                        <td>
+                            @if (acc.LastLoginAtUtc.HasValue)
+                            {
+                                <span class="small">@acc.LastLoginAtUtc.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">—</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                @if (!acc.HasAccount)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary btn-provision"
+                                            data-serviceno="@acc.ServiceNo"
+                                            data-name="@acc.MemberName"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#provisionModal">
+                                        <i class="bi bi-person-plus me-1"></i>Provision
+                                    </button>
+                                }
+                                else
+                                {
+                                    @if (!acc.IsActivated && !string.IsNullOrEmpty(acc.ActivationLink))
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-warning btn-act-link"
+                                                data-link="@acc.ActivationLink"
+                                                data-serviceno="@acc.ServiceNo"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#actLinkModal">
+                                            <i class="bi bi-link-45deg me-1"></i>Activation Link
+                                        </button>
+                                    }
+
+                                    <form asp-action="ToggleStatus" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="serviceNo" value="@acc.ServiceNo" />
+                                        <button type="submit" class="btn btn-sm @(acc.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                                title="@(acc.IsActive ? "Deactivate Account" : "Activate Account")">
+                                            <i class="bi @(acc.IsActive ? "bi-lock" : "bi-unlock")"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Provision Single Account -->
+<div class="modal fade" id="provisionModal" tabindex="-1" aria-labelledby="provisionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="provisionModalLabel"><i class="bi bi-person-plus-fill me-2"></i>Provision Member Account</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ProvisionAccount" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <input type="hidden" id="modalServiceNo" name="ServiceNo" />
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Member</label>
+                        <input type="text" id="modalMemberDisplay" class="form-control bg-light" readonly disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalEmail" class="form-label fw-bold small">Login Email Address</label>
+                        <input type="email" id="modalEmail" name="Email" class="form-control" required placeholder="veteran@domain.com" />
+                        <div class="form-text small">An activation link will be generated for the member to establish their password.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i>Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: View & Copy Activation Link -->
+<div class="modal fade" id="actLinkModal" tabindex="-1" aria-labelledby="actLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="actLinkModalLabel"><i class="bi bi-link-45deg me-2"></i>Member Account Activation Link</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-muted mb-2">Share this unique secure link with the veteran so they can establish their password and activate their account:</p>
+                <div class="input-group mb-3">
+                    <input type="text" id="activationLinkInput" class="form-control font-monospace small" readonly />
+                    <button class="btn btn-outline-secondary" type="button" id="copyActLinkBtn">
+                        <i class="bi bi-clipboard me-1"></i>Copy
+                    </button>
+                </div>
+                <div id="copySuccessMsg" class="alert alert-success py-2 small d-none">
+                    <i class="bi bi-check2-circle me-1"></i>Link copied to clipboard!
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script nonce="@cspNonce">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Provision modal setup
+            document.querySelectorAll('.btn-provision').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var serviceNo = this.getAttribute('data-serviceno');
+                    var name = this.getAttribute('data-name');
+                    document.getElementById('modalServiceNo').value = serviceNo;
+                    document.getElementById('modalMemberDisplay').value = name + ' (' + serviceNo + ')';
+                    document.getElementById('modalEmail').value = serviceNo.toLowerCase() + '@@iaf1986.local';
+                });
+            });
+
+            // Activation link modal setup
+            document.querySelectorAll('.btn-act-link').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var link = this.getAttribute('data-link');
+                    document.getElementById('activationLinkInput').value = link;
+                    document.getElementById('copySuccessMsg').classList.add('d-none');
+                });
+            });
+
+            // Copy to clipboard
+            var copyBtn = document.getElementById('copyActLinkBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    var input = document.getElementById('activationLinkInput');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    navigator.clipboard.writeText(input.value).then(function () {
+                        document.getElementById('copySuccessMsg').classList.remove('d-none');
+                    });
+                });
+            }
+        });
+    </script>
+}

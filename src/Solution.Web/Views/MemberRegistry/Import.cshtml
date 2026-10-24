@@ -1,0 +1,241 @@
+@model Solution.Web.Models.MemberImportViewModel
+@{
+    ViewData["Title"] = "Import Members from Excel / CSV";
+    var cspNonce = Context.Items[SecurityHeadersMiddleware.CspNonceKey]?.ToString() ?? string.Empty;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>Member Data Import</h2>
+        <p class="text-muted small mb-0">Import Indian Air Force Batch 1986 records from Excel (.xlsx) or CSV (.csv) files.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Registry
+    </a>
+</div>
+
+<!-- Upload Box -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-cloud-arrow-up me-2"></i>Select Member Data File</h5>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Import" method="post" enctype="multipart/form-data" class="row g-3 align-items-center">
+            <div class="col-md-7">
+                <input asp-for="File" type="file" class="form-control form-control-lg" accept=".xlsx,.csv" required />
+                <span asp-validation-for="File" class="text-danger small"></span>
+                <div class="form-text small">
+                    Supported column headers: <code>ServiceNo, Name, DOB, DOD, TradeID, Address1, Address2, StateID, MobileNo, TechnicalSkills, PlacesWorked, AdditionalDetails, Achievements, VRSReason</code>
+                </div>
+            </div>
+            <div class="col-md-5 d-flex gap-2">
+                <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm">
+                    <i class="bi bi-search me-1"></i>Upload & Validate Preview
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Preview != null)
+{
+    @if (Model.Preview.FileErrors.Count > 0)
+    {
+        <div class="alert alert-danger shadow-sm">
+            <h6 class="fw-bold"><i class="bi bi-exclamation-octagon me-2"></i>File Processing Error</h6>
+            <ul class="mb-0 small">
+                @foreach (var err in Model.Preview.FileErrors)
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <!-- Preview Summary Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card stat-card bg-primary text-white shadow-sm border-0">
+                    <div class="card-body py-3">
+                        <span class="small text-white-50">Total Rows in File</span>
+                        <h3 class="fw-bold mb-0">@Model.Preview.TotalRecords</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card stat-card bg-success text-white shadow-sm border-0">
+                    <div class="card-body py-3">
+                        <span class="small text-white-50">Ready to Import</span>
+                        <h3 class="fw-bold mb-0">@Model.Preview.ValidCount</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card stat-card bg-warning text-dark shadow-sm border-0">
+                    <div class="card-body py-3">
+                        <span class="small text-muted">Duplicates (Skipped)</span>
+                        <h3 class="fw-bold mb-0">@Model.Preview.DuplicateCount</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card stat-card bg-danger text-white shadow-sm border-0">
+                    <div class="card-body py-3">
+                        <span class="small text-white-50">Validation Errors</span>
+                        <h3 class="fw-bold mb-0">@Model.Preview.InvalidCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold mb-0"><i class="bi bi-table me-2"></i>Data Preview (@Model.Preview.FileName)</h5>
+            <div class="d-flex gap-2">
+                @if (Model.Preview.InvalidCount > 0)
+                {
+                    <button type="button" id="btnDownloadErrors" class="btn btn-outline-danger">
+                        <i class="bi bi-download me-1"></i>Download Error Report (.xlsx)
+                    </button>
+                }
+                @if (Model.Preview.ValidCount > 0)
+                {
+                    <button type="button" id="btnCommitImport" class="btn btn-primary px-4 fw-bold shadow-sm">
+                        <i class="bi bi-check2-circle me-1"></i>Confirm Import (@Model.Preview.ValidCount Records)
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>#</th>
+                            <th>Service No</th>
+                            <th>Name</th>
+                            <th>Trade</th>
+                            <th>State</th>
+                            <th>Mobile</th>
+                            <th>Status</th>
+                            <th>Validation Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Preview.Rows)
+                        {
+                            <tr class="@(row.IsDuplicate ? "table-warning" : (!row.IsValid ? "table-danger" : ""))">
+                                <td>@row.RowIndex</td>
+                                <td class="fw-bold">@row.ServiceNo</td>
+                                <td>@row.Name</td>
+                                <td>@(row.TradeId ?? "-")</td>
+                                <td>@(row.StateId ?? "-")</td>
+                                <td>@(row.MobileNo ?? "-")</td>
+                                <td>
+                                    @if (row.IsDuplicate)
+                                    {
+                                        <span class="badge bg-warning text-dark">Duplicate</span>
+                                    }
+                                    else if (!row.IsValid)
+                                    {
+                                        <span class="badge bg-danger">Invalid</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Valid</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (row.ValidationErrors.Count > 0)
+                                    {
+                                        <span class="text-danger">@string.Join("; ", row.ValidationErrors)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success"><i class="bi bi-check me-1"></i>OK</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script nonce="@cspNonce">
+        const previewRows = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Preview?.Rows ?? new List<Solution.Application.DTOs.ImportRowDto>()));
+
+        const btnCommit = document.getElementById('btnCommitImport');
+        if (btnCommit) {
+            btnCommit.addEventListener('click', async function () {
+                if (!confirm('Proceed with importing ' + @(Model.Preview?.ValidCount ?? 0) + ' valid member records?')) return;
+
+                btnCommit.disabled = true;
+                btnCommit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Importing...';
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                    const response = await fetch('@Url.Action("ConfirmImport", "MemberRegistry")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': token,
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify(previewRows)
+                    });
+
+                    const res = await response.json();
+                    if (res.success) {
+                        alert('Import successful! Imported ' + res.successfullyImported + ' members.');
+                        window.location.href = '@Url.Action("Index", "MemberRegistry")';
+                    } else {
+                        alert('Import failed: ' + (res.errorMessages || []).join('\n'));
+                        btnCommit.disabled = false;
+                        btnCommit.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Confirm Import';
+                    }
+                } catch (e) {
+                    alert('Error during import: ' + e);
+                    btnCommit.disabled = false;
+                    btnCommit.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Confirm Import';
+                }
+            });
+        }
+
+        const btnErrors = document.getElementById('btnDownloadErrors');
+        if (btnErrors) {
+            btnErrors.addEventListener('click', async function () {
+                const invalidRows = previewRows.filter(r => !r.isValid || r.isDuplicate);
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                const response = await fetch('@Url.Action("DownloadErrorReport", "MemberRegistry")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(invalidRows)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Member_Import_Errors.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    alert('Failed to generate error report.');
+                }
+            });
+        }
+    </script>
+}

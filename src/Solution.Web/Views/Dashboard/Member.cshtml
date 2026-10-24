@@ -1,0 +1,257 @@
+@model Solution.Application.DTOs.MemberDashboardStatsDto
+@{
+    ViewData["Title"] = "Veteran Portal";
+    var member = Model.MemberSummary;
+    var ev = Model.ActiveEvent;
+    var reg = Model.Registration;
+    var pmt = Model.LatestPayment;
+}
+
+<!-- Welcome Banner -->
+<div class="card border-0 shadow-sm mb-4 bg-primary text-white">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="badge bg-warning text-dark px-3 py-2 mb-2 fw-bold text-uppercase">IAF Batch 1986 Veteran</span>
+                <h2 class="fw-bold mb-1">Welcome, @member.Name</h2>
+                <p class="mb-0 text-white-50">
+                    Service No: <strong>@member.ServiceNo</strong> &bull;
+                    Trade: <strong>@(member.TradeName ?? "Air Force")</strong> &bull;
+                    State: <strong>@(member.StateName ?? "India")</strong>
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a asp-controller="MemberRegistry" asp-action="Details" asp-route-id="@member.ServiceNo" class="btn btn-outline-light">
+                    <i class="bi bi-person-badge me-1"></i>View Full Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ev != null)
+{
+    <!-- Reunion Event Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-secondary mb-2">Upcoming Event</span>
+                    <h3 class="fw-bold text-dark mb-2">@ev.Title</h3>
+                    <p class="text-muted mb-3">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Venue:</strong> @ev.Venue<br />
+                        <i class="bi bi-calendar-check text-primary me-1"></i><strong>Date:</strong> @ev.EventDate.ToString("dd MMMM yyyy")
+                        @if (ev.EventEndDate.HasValue)
+                        {
+                            <span> to @ev.EventEndDate.Value.ToString("dd MMMM yyyy")</span>
+                        }
+                    </p>
+                    @if (!string.IsNullOrWhiteSpace(ev.Description))
+                    {
+                        <div class="p-3 bg-light rounded-3 mb-3 small text-muted">
+                            @ev.Description
+                        </div>
+                    }
+                </div>
+                <div class="col-lg-4 text-lg-end border-start-lg ps-lg-4">
+                    <div class="mb-3">
+                        <div class="small text-muted">Base Event Fee</div>
+                        <div class="fs-2 fw-bold text-primary">₹@ev.BaseFeeAmount.ToString("N0")</div>
+                        <div class="badge bg-warning text-dark">Deadline: @ev.RegistrationDeadline.ToString("dd MMM yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row g-4 mb-4">
+    <!-- Registration Status Card -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-ui-checks text-primary me-2"></i>Reunion Registration</h5>
+                @if (reg != null)
+                {
+                    @switch (reg.RegistrationStatus)
+                    {
+                        case Solution.Domain.Enums.RegistrationStatus.Confirmed:
+                            <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Confirmed</span>
+                            break;
+                        case Solution.Domain.Enums.RegistrationStatus.Submitted:
+                            <span class="badge bg-primary"><i class="bi bi-clock-history me-1"></i>Submitted</span>
+                            break;
+                        case Solution.Domain.Enums.RegistrationStatus.Cancelled:
+                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                            break;
+                        default:
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            break;
+                    }
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Not Registered</span>
+                }
+            </div>
+            <div class="card-body p-4">
+                @if (reg != null)
+                {
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Attendees</span>
+                            <strong>@reg.NoOfPersons person(s)</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">T-Shirt Size</span>
+                            <span class="badge bg-dark">@(reg.TShirt ?? "L")</span>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <span class="text-muted small d-block">Diet Preference</span>
+                            <strong>@(reg.VegNonVeg == 0 ? "Vegetarian" : "Non-Vegetarian")</strong>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <span class="text-muted small d-block">Beverage</span>
+                            <strong>@(reg.Drinker == 1 ? "Drinker" : "Non-Drinker")</strong>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(reg.AccompDetails))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small d-block">Accompanying Persons:</span>
+                            <span class="small font-monospace">@reg.AccompDetails</span>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Arrival Transit:</span>
+                        <span class="small">@(reg.PlaceOfArrival ?? "—") on @(reg.DateOfArrival?.ToString("dd MMM yyyy, HH:mm") ?? "—")</span>
+                    </div>
+
+                    <div class="pt-3 border-top">
+                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i>Update Preferences
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-4">
+                        You have not submitted your attendance preferences for this reunion. Please let the organizers know your travel itinerary and guest count.
+                    </p>
+                    <a asp-controller="Reunion" asp-action="Register" class="btn btn-primary">
+                        <i class="bi bi-clipboard-check me-1"></i>Register for Reunion Now
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee & Payment Status Card -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-credit-card text-primary me-2"></i>Reunion Fee Payment</h5>
+                @if (pmt != null)
+                {
+                    @switch (pmt.PaymentStatus)
+                    {
+                        case Solution.Domain.Enums.PaymentStatus.Verified:
+                            <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Verified / Paid</span>
+                            break;
+                        case Solution.Domain.Enums.PaymentStatus.PendingVerification:
+                        case Solution.Domain.Enums.PaymentStatus.PaymentDetailsSubmitted:
+                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending Verification</span>
+                            break;
+                        case Solution.Domain.Enums.PaymentStatus.Rejected:
+                            <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i>Rejected</span>
+                            break;
+                        default:
+                            <span class="badge bg-secondary">Unpaid</span>
+                            break;
+                    }
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Unpaid</span>
+                }
+            </div>
+            <div class="card-body p-4">
+                @if (pmt != null && pmt.PaymentStatus != Solution.Domain.Enums.PaymentStatus.Unpaid)
+                {
+                    @if (pmt.PaymentStatus == Solution.Domain.Enums.PaymentStatus.Rejected)
+                    {
+                        <div class="alert alert-danger py-2 small mb-3">
+                            <strong><i class="bi bi-exclamation-octagon me-1"></i>Payment Not Confirmed:</strong>
+                            <div>@(string.IsNullOrWhiteSpace(pmt.RejectionReason) ? "Transaction reference could not be matched." : pmt.RejectionReason)</div>
+                        </div>
+                    }
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Amount Reported</span>
+                            <h4 class="fw-bold text-dark mb-0">₹@pmt.AmountPaid.ToString("N0")</h4>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Payment Mode</span>
+                            <span class="badge bg-secondary">@pmt.PaymentMode</span>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <span class="text-muted small d-block">Acknowledgement / Ref No</span>
+                            <span class="font-monospace">@(pmt.AcknowledgementNumber ?? "—")</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(pmt.PaymentProofPath))
+                    {
+                        <div class="mb-3">
+                            <a asp-controller="Payment" asp-action="Proof" asp-route-id="@pmt.PaymentId" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-file-earmark-check me-1"></i>View Uploaded Receipt
+                            </a>
+                        </div>
+                    }
+
+                    <div class="pt-3 border-top">
+                        <a asp-controller="Payment" asp-action="Submit" asp-route-eventId="@(ev?.EventId ?? 1)" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>@(pmt.PaymentStatus == Solution.Domain.Enums.PaymentStatus.Rejected ? "Resubmit Payment Details" : "Update Payment Details")
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-4">
+                        Reunion fee payment has not been reported for this account. Have you transferred via UPI or Bank?
+                    </p>
+                    <a asp-controller="Payment" asp-action="Submit" asp-route-eventId="@(ev?.EventId ?? 1)" class="btn btn-success">
+                        <i class="bi bi-cash me-1"></i>Submit Payment Confirmation
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Announcements Card -->
+@if (Model.Announcements.Count > 0)
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-megaphone-fill text-warning me-2"></i>Reunion Announcements & Notices</h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="list-group list-group-flush">
+                @foreach (var notice in Model.Announcements)
+                {
+                    <div class="list-group-item px-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold mb-0 text-primary">@notice.Title</h6>
+                            <small class="text-muted">@notice.PublishedAtUtc.ToString("dd MMM yyyy") by @notice.AuthorName</small>
+                        </div>
+                        <p class="mb-0 text-secondary small">@notice.Content</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

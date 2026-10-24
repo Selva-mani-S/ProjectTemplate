@@ -1,0 +1,386 @@
+@model Solution.Application.DTOs.MemberDetailsDto
+@{
+    ViewData["Title"] = $"Member - {Model.Name} ({Model.ServiceNo})";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark">
+            <span class="badge bg-dark me-2">@Model.ServiceNo</span>@Model.Name
+        </h2>
+        <span class="text-muted small">Trade: <strong>@(Model.TradeName ?? Model.TradeId ?? "N/A")</strong> | State: <strong>@(Model.StateName ?? Model.StateId ?? "N/A")</strong></span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.ServiceNo" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Edit Member Details
+        </a>
+        <a asp-action="Index" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Registry
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Personal Data & Account -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Personal & Service Record</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Service Number</label>
+                        <span class="fw-bold">@Model.ServiceNo</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Full Name</label>
+                        <span class="fw-bold">@Model.Name</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Date of Birth</label>
+                        <span>@(Model.Dob?.ToString("dd-MMM-yyyy") ?? "-")</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Date of Demise</label>
+                        <span>@(Model.Dod?.ToString("dd-MMM-yyyy") ?? "-")</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Trade</label>
+                        <span>@(Model.TradeName ?? Model.TradeId ?? "-")</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">State</label>
+                        <span>@(Model.StateName ?? Model.StateId ?? "-")</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">Mobile Number</label>
+                        <span>@(Model.MobileNo ?? "-")</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small d-block">VRS Reason</label>
+                        <span>@(Model.VrsReason ?? "-")</span>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small d-block">Address</label>
+                        <span>@string.Join(", ", new[] { Model.Address1, Model.Address2 }.Where(s => !string.IsNullOrWhiteSpace(s)))</span>
+                        @if (string.IsNullOrWhiteSpace(Model.Address1) && string.IsNullOrWhiteSpace(Model.Address2))
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small d-block">Technical Skills</label>
+                        <span>@(Model.TechnicalSkills ?? "-")</span>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small d-block">Places Worked / Postings</label>
+                        <span>@(Model.PlacesWorked ?? "-")</span>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small d-block">Achievements</label>
+                        <span>@(Model.Achievements ?? "-")</span>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small d-block">Additional Details</label>
+                        <span>@(Model.AdditionalDetails ?? "-")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Family Information Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-people me-2"></i>Family Members</h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addFamilyModal">
+                    <i class="bi bi-plus-circle me-1"></i>Add Family Member
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Relationship</th>
+                                <th>Gender</th>
+                                <th>Occupation</th>
+                                <th>Remarks</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.FamilyMembers.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-3 text-muted small">No family members recorded.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var fam in Model.FamilyMembers)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@fam.MemberName</td>
+                                        <td>@(fam.Relationship ?? "-")</td>
+                                        <td>@(fam.Gender ?? "-")</td>
+                                        <td>@(fam.Occupation ?? "-")</td>
+                                        <td><span class="small text-muted">@(fam.Remarks ?? "-")</span></td>
+                                        <td class="text-end">
+                                            <form asp-action="RemoveFamily" method="post" class="d-inline" onsubmit="return confirm('Remove family member?');">
+                                                <input type="hidden" name="familyMemberId" value="@fam.FamilyMemberId" />
+                                                <input type="hidden" name="serviceNo" value="@Model.ServiceNo" />
+                                                <button type="submit" class="btn btn-link text-danger btn-sm p-0"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Account Status, Reunion Registration, Payments, Photos -->
+    <div class="col-lg-5">
+        <!-- Account Status Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-badge me-2"></i>User Account</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.HasAccount)
+                {
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="text-muted small me-2">Account:</span>
+                        <span class="badge @(Model.IsAccountActive ? "bg-success" : "bg-danger") badge-pill">
+                            @(Model.IsAccountActive ? "Active" : "Inactive")
+                        </span>
+                    </div>
+                    <p class="mb-1 small">Email: <strong>@Model.AccountEmail</strong></p>
+                    <p class="mb-0 small text-muted">Last Login: @(Model.LastLoginAtUtc?.ToString("dd-MMM-yyyy HH:mm") ?? "Never")</p>
+                }
+                else
+                {
+                    <p class="text-muted small mb-2">No portal login account generated for this member yet.</p>
+                    <a asp-controller="MemberAccount" asp-action="Index" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-key me-1"></i>Provision Account
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Reunion Registration Status Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-calendar-check me-2"></i>Reunion Registration</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CurrentRegistration != null)
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0">@Model.CurrentRegistration.EventTitle</h6>
+                        <span class="badge bg-primary badge-pill">@Model.CurrentRegistration.RegistrationStatus</span>
+                    </div>
+                    <ul class="list-unstyled small mb-0">
+                        <li>Total Attendees: <strong>@Model.CurrentRegistration.NoOfPersons</strong> (@(Model.CurrentRegistration.AccompDetails ?? "Member only"))</li>
+                        <li>Arrival: <strong>@(Model.CurrentRegistration.DateOfArrival?.ToString("dd-MMM-yyyy HH:mm") ?? "-")</strong> at @(Model.CurrentRegistration.PlaceOfArrival ?? "-")</li>
+                        <li>Departure: <strong>@(Model.CurrentRegistration.DateOfDeparture?.ToString("dd-MMM-yyyy HH:mm") ?? "-")</strong> from @(Model.CurrentRegistration.PlaceOfDeparture ?? "-")</li>
+                        <li>Accommodation: <strong>@(Model.CurrentRegistration.Accommodation ?? "-")</strong></li>
+                        <li>T-Shirt Size: <strong>@(Model.CurrentRegistration.TShirt ?? "-")</strong></li>
+                        <li>Catering: <strong>@(Model.CurrentRegistration.VegNonVeg == 0 ? "Vegetarian" : "Non-Vegetarian")</strong> | <strong>@(Model.CurrentRegistration.Drinker == 1 ? "Drinker" : "Non-Drinker")</strong></li>
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Member has not registered for any upcoming reunion.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Payment History Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-credit-card me-2"></i>Fee Payment Records</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mode</th>
+                                <th>Ack / Ref</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Payments.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">No payment records found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.Payments)
+                                {
+                                    <tr>
+                                        <td>@p.PaymentMode</td>
+                                        <td>@(p.AcknowledgementNumber ?? "-")</td>
+                                        <td>₹@p.AmountPaid.ToString("N2")</td>
+                                        <td>
+                                            @switch (p.PaymentStatus.ToString())
+                                            {
+                                                case "Verified":
+                                                    <span class="badge bg-success">Verified</span>
+                                                    break;
+                                                case "PendingVerification":
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                    break;
+                                                case "Rejected":
+                                                    <span class="badge bg-danger" title="@p.RejectionReason">Rejected</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">Unpaid</span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photographs (IAF_AdditionalData) -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-images me-2"></i>Photographs</h5>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
+                    <i class="bi bi-upload me-1"></i>Upload Photo
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <div class="col-4 text-center">
+                            <div class="border rounded p-1 bg-light">
+                                <img src="@Url.Action("Photo", "MemberRegistry", new { serviceNo = Model.ServiceNo, index = i })" 
+                                     alt="Photo @i" 
+                                     class="img-fluid rounded mb-1" 
+                                     style="height: 80px; width: 100%; object-fit: cover;" 
+                                     onerror="this.src='https://placehold.co/100x80?text=Photo+@i'; this.onerror=null;" />
+                                <span class="small text-muted d-block">Photo @i</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone: Delete Member -->
+        <div class="card border-danger border-opacity-25 shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-danger fw-bold mb-0">Delete Member Record</h6>
+                    <small class="text-muted">Permanently removes member, family, and photos.</small>
+                </div>
+                <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete member @Model.ServiceNo?');">
+                    <input type="hidden" name="serviceNo" value="@Model.ServiceNo" />
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Family Member -->
+<div class="modal fade" id="addFamilyModal" tabindex="-1" aria-labelledby="addFamilyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="AddFamily" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFamilyModalLabel"><i class="bi bi-person-plus me-2"></i>Add Family Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="ServiceNo" value="@Model.ServiceNo" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Member Name *</label>
+                        <input type="text" name="MemberName" class="form-control" required maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Relationship</label>
+                        <input type="text" name="Relationship" class="form-control" placeholder="Spouse, Son, Daughter, etc." maxlength="30" />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Gender</label>
+                            <select name="Gender" class="form-select">
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="O">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Occupation</label>
+                            <input type="text" name="Occupation" class="form-control" maxlength="100" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Remarks</label>
+                        <input type="text" name="Remarks" class="form-control" maxlength="200" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Family Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Upload Photo -->
+<div class="modal fade" id="uploadPhotoModal" tabindex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UploadPhoto" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadPhotoModalLabel"><i class="bi bi-upload me-2"></i>Upload Photograph</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="serviceNo" value="@Model.ServiceNo" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Select Photo Slot (1 to 5)</label>
+                        <select name="photoIndex" class="form-select">
+                            <option value="1">Photo 1 (Profile / Member Photo)</option>
+                            <option value="2">Photo 2 (Spouse / Family Photo)</option>
+                            <option value="3">Photo 3 (Service / Uniform Photo)</option>
+                            <option value="4">Photo 4 (Additional Photo 1)</option>
+                            <option value="5">Photo 5 (Additional Photo 2)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Image File (JPG, PNG - Max 5 MB)</label>
+                        <input type="file" name="photoFile" class="form-control" accept="image/jpeg,image/png" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

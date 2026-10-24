@@ -1,0 +1,109 @@
+@model Solution.Web.Models.MemberFormViewModel
+@{
+    ViewData["Title"] = $"Edit Member - {Model.ServiceNo}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Edit Member: @Model.ServiceNo</h4>
+                <a asp-action="Details" asp-route-id="@Model.ServiceNo" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-eye me-1"></i>View Profile
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="ServiceNo" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Service Number</label>
+                            <input class="form-control bg-light" value="@Model.ServiceNo" readonly disabled />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label fw-bold small"></label>
+                            <input asp-for="Name" class="form-control" maxlength="100" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TradeId" class="form-label fw-bold small"></label>
+                            <select asp-for="TradeId" class="form-select">
+                                <option value="">-- Select Trade --</option>
+                                @foreach (var trade in Model.AvailableTrades)
+                                {
+                                    <option value="@trade.TradeId">@trade.TradeName (@trade.TradeId)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="StateId" class="form-label fw-bold small"></label>
+                            <select asp-for="StateId" class="form-select">
+                                <option value="">-- Select State --</option>
+                                @foreach (var state in Model.AvailableStates)
+                                {
+                                    <option value="@state.StateId">@state.StateName (@state.StateId)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Dob" class="form-label fw-bold small"></label>
+                            <input asp-for="Dob" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Dod" class="form-label fw-bold small"></label>
+                            <input asp-for="Dod" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MobileNo" class="form-label fw-bold small"></label>
+                            <input asp-for="MobileNo" class="form-control" maxlength="13" />
+                            <span asp-validation-for="MobileNo" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Address1" class="form-label fw-bold small"></label>
+                            <input asp-for="Address1" class="form-control" maxlength="50" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Address2" class="form-label fw-bold small"></label>
+                            <input asp-for="Address2" class="form-control" maxlength="50" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TechnicalSkills" class="form-label fw-bold small"></label>
+                            <input asp-for="TechnicalSkills" class="form-control" maxlength="250" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PlacesWorked" class="form-label fw-bold small"></label>
+                            <input asp-for="PlacesWorked" class="form-control" maxlength="250" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Achievements" class="form-label fw-bold small"></label>
+                            <input asp-for="Achievements" class="form-control" maxlength="200" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VrsReason" class="form-label fw-bold small"></label>
+                            <input asp-for="VrsReason" class="form-control" maxlength="200" />
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="AdditionalDetails" class="form-label fw-bold small"></label>
+                            <textarea asp-for="AdditionalDetails" class="form-control" rows="2" maxlength="250"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Details" asp-route-id="@Model.ServiceNo" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-check-circle me-1"></i>Update Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

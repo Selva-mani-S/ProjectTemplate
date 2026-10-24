@@ -1,0 +1,82 @@
+@model Solution.Web.Models.ReportListViewModel
+@{
+    ViewData["Title"] = "Reports & Data Export";
+    var events = ViewBag.Events as List<Solution.Application.DTOs.ReunionEventDto> ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-spreadsheet text-primary me-2"></i>Reunion Reports & Data Export</h2>
+        <p class="text-muted small mb-0">Generate, view, and export comprehensive operational, logistical, and financial datasets.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form method="get" asp-action="Index" class="d-inline-flex gap-2">
+            <select name="eventId" class="form-select form-select-sm" onchange="this.form.submit()">
+                @foreach (var ev in events)
+                {
+                    <option value="@ev.EventId" selected="@(ev.EventId == Model.ActiveEventId)">
+                        @ev.Title (@ev.EventDate.ToString("yyyy"))
+                    </option>
+                }
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Category Groups -->
+@foreach (var categoryGroup in Model.Reports.GroupBy(r => r.Category))
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h5 class="fw-bold mb-0 text-dark">
+                @switch (categoryGroup.Key)
+                {
+                    case "Registry":
+                        <i class="bi bi-person-lines-fill text-primary me-2"></i><span>Member Registry & Accounts Reports</span>
+                        break;
+                    case "Logistics":
+                        <i class="bi bi-truck text-info me-2"></i><span>Attendance & Event Logistics Reports</span>
+                        break;
+                    case "Financial":
+                        <i class="bi bi-cash-stack text-success me-2"></i><span>Fee Collection & Financial Audit Reports</span>
+                        break;
+                    default:
+                        <i class="bi bi-folder me-2 text-secondary"></i><span>@categoryGroup.Key Reports</span>
+                        break;
+                }
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 35%;">Report Title</th>
+                        <th style="width: 40%;">Description</th>
+                        <th style="width: 20%;" class="text-end">Export Formats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var report in categoryGroup)
+                    {
+                        <tr>
+                            <td class="fw-bold text-muted">@report.ReportNumber</td>
+                            <td class="fw-bold text-dark">@report.Title</td>
+                            <td class="text-muted small">@report.Description</td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-action="ExportExcel" asp-route-reportNumber="@report.ReportNumber" asp-route-eventId="@Model.ActiveEventId" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                                    </a>
+                                    <a asp-action="ExportCsv" asp-route-reportNumber="@report.ReportNumber" asp-route-eventId="@Model.ActiveEventId" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-filetype-csv me-1"></i>CSV
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Solution.Infrastructure.Identity;
+using Solution.Infrastructure.Persistence;
 using Solution.Web.Extensions;
 using Solution.Web.Middleware;
 
@@ -14,10 +15,12 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 // Configure Services
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddSecurityAndIdentityServices();
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Seed Default Pre-Seeded Site Admin User
+// Initialize Database & Seed Master Data
+await DbInitializer.InitializeAsync(app.Services).ConfigureAwait(false);
 await IdentityDataSeeder.SeedAdminUserAsync(app.Services).ConfigureAwait(false);
 
 // OWASP A09: Custom StatusCodePages and Error Pipeline hiding stack traces and internal metadata

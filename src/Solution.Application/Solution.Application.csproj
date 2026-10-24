@@ -8,4 +8,9 @@
     <ProjectReference Include="..\Solution.Domain\Solution.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" />
+    <PackageReference Include="CsvHelper" />
+  </ItemGroup>
+
 </Project>

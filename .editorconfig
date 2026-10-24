@@ -1,0 +1,11 @@
+# Top-most EditorConfig file
+root = true
+
+[*.cs]
+dotnet_diagnostic.CA1861.severity = none
+
+# Ignore analyzer rules in EF Core Migrations
+[**/Migrations/**.cs]
+dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1814.severity = none

@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class IdentityDataSeeder
 {
+    public const string AdminRole = "Administrator";
+    public const string MemberRole = "Member";
+
     public static async Task SeedAdminUserAsync(IServiceProvider serviceProvider)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
@@ -13,15 +16,23 @@ public static class IdentityDataSeeder
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-        const string adminRole = "Administrator";
         const string adminEmail = "admin@baseline.local";
 
-        if (!await roleManager.RoleExistsAsync(adminRole).ConfigureAwait(false))
+        if (!await roleManager.RoleExistsAsync(AdminRole).ConfigureAwait(false))
         {
             await roleManager.CreateAsync(new ApplicationRole
             {
-                Name = adminRole,
+                Name = AdminRole,
                 Description = "System Administrator with full permissions"
+            }).ConfigureAwait(false);
+        }
+
+        if (!await roleManager.RoleExistsAsync(MemberRole).ConfigureAwait(false))
+        {
+            await roleManager.CreateAsync(new ApplicationRole
+            {
+                Name = MemberRole,
+                Description = "IAF Batch 1986 Registered Member"
             }).ConfigureAwait(false);
         }
 
@@ -34,7 +45,9 @@ public static class IdentityDataSeeder
                 Email = adminEmail,
                 FirstName = "System",
                 LastName = "Administrator",
+                Department = "Headquarters",
                 EmailConfirmed = true,
+                IsActive = true,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
@@ -42,7 +55,7 @@ public static class IdentityDataSeeder
             IdentityResult result = await userManager.CreateAsync(adminUser, "AdminP@ssw0rd123!").ConfigureAwait(false);
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(adminUser, adminRole).ConfigureAwait(false);
+                await userManager.AddToRoleAsync(adminUser, AdminRole).ConfigureAwait(false);
             }
         }
     }

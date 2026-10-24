@@ -1,0 +1,106 @@
+@model Solution.Web.Models.MemberFormViewModel
+@{
+    ViewData["Title"] = "Add New Member";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Add Member to Registry</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="ServiceNo" class="form-label fw-bold small"></label>
+                            <input asp-for="ServiceNo" class="form-control" placeholder="e.g. 682145" maxlength="6" required />
+                            <span asp-validation-for="ServiceNo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label fw-bold small"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Full Name" maxlength="100" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TradeId" class="form-label fw-bold small"></label>
+                            <select asp-for="TradeId" class="form-select">
+                                <option value="">-- Select Trade --</option>
+                                @foreach (var trade in Model.AvailableTrades)
+                                {
+                                    <option value="@trade.TradeId">@trade.TradeName (@trade.TradeId)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="StateId" class="form-label fw-bold small"></label>
+                            <select asp-for="StateId" class="form-select">
+                                <option value="">-- Select State --</option>
+                                @foreach (var state in Model.AvailableStates)
+                                {
+                                    <option value="@state.StateId">@state.StateName (@state.StateId)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Dob" class="form-label fw-bold small"></label>
+                            <input asp-for="Dob" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Dod" class="form-label fw-bold small"></label>
+                            <input asp-for="Dod" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MobileNo" class="form-label fw-bold small"></label>
+                            <input asp-for="MobileNo" class="form-control" placeholder="e.g. +919876543210" maxlength="13" />
+                            <span asp-validation-for="MobileNo" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Address1" class="form-label fw-bold small"></label>
+                            <input asp-for="Address1" class="form-control" maxlength="50" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Address2" class="form-label fw-bold small"></label>
+                            <input asp-for="Address2" class="form-control" maxlength="50" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TechnicalSkills" class="form-label fw-bold small"></label>
+                            <input asp-for="TechnicalSkills" class="form-control" maxlength="250" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PlacesWorked" class="form-label fw-bold small"></label>
+                            <input asp-for="PlacesWorked" class="form-control" placeholder="Stations / Bases posted" maxlength="250" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Achievements" class="form-label fw-bold small"></label>
+                            <input asp-for="Achievements" class="form-control" maxlength="200" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VrsReason" class="form-label fw-bold small"></label>
+                            <input asp-for="VrsReason" class="form-control" maxlength="200" />
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="AdditionalDetails" class="form-label fw-bold small"></label>
+                            <textarea asp-for="AdditionalDetails" class="form-control" rows="2" maxlength="250"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-check-circle me-1"></i>Save Member
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

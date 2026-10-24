@@ -92,11 +92,7 @@ dotnet ef migrations add InitialAppDb \
   --output-dir Persistence/Migrations/AppDb
 
 # Update Database for AppDbContext
-dotnet ef database update \
-  --project src/Solution.Infrastructure/Solution.Infrastructure.csproj \
-  --startup-project src/Solution.Web/Solution.Web.csproj \
-  --context Solution.Infrastructure.Persistence.AppDbContext
-```
+dotnet ef database update  --project src/Solution.Infrastructure/Solution.Infrastructure.csproj --startup-project src/Solution.Web/Solution.Web.csproj --context Solution.Infrastructure.Persistence.AppDbContext
 
 #### B. Initializing Migrations for AppIdentityDbContext (ASP.NET Core Identity)
 
@@ -109,11 +105,7 @@ dotnet ef migrations add InitialIdentityDb \
   --output-dir Persistence/Migrations/IdentityDb
 
 # Update Database for AppIdentityDbContext
-dotnet ef database update \
-  --project src/Solution.Infrastructure/Solution.Infrastructure.csproj \
-  --startup-project src/Solution.Web/Solution.Web.csproj \
-  --context Solution.Infrastructure.Persistence.AppIdentityDbContext
-```
+dotnet ef database update --project src/Solution.Infrastructure/Solution.Infrastructure.csproj --startup-project src/Solution.Web/Solution.Web.csproj --context Solution.Infrastructure.Persistence.AppIdentityDbContext
 
 ---
 

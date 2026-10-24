@@ -1,0 +1,89 @@
+@model List<Solution.Application.DTOs.ReunionEventDto>
+@{
+    ViewData["Title"] = "Reunion Events Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-event text-primary me-2"></i>Reunion Events</h2>
+        <p class="text-muted small mb-0">Configure reunion event dates, venue, registration fees, and deadlines.</p>
+    </div>
+    <div>
+        <a asp-action="EditEvent" class="btn btn-primary">
+            <i class="bi bi-calendar-plus me-1"></i>Create New Reunion Event
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Event ID</th>
+                    <th>Event Title</th>
+                    <th>Batch</th>
+                    <th>Dates</th>
+                    <th>Venue</th>
+                    <th>Registration Deadline</th>
+                    <th>Base Fee</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            No events configured yet. Click "Create New Reunion Event" to add one.
+                        </td>
+                    </tr>
+                }
+                @foreach (var ev in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">#@ev.EventId</td>
+                        <td class="fw-bold text-primary">@ev.Title</td>
+                        <td><span class="badge bg-secondary">@ev.Batch</span></td>
+                        <td>
+                            <div>@ev.EventDate.ToString("dd MMM yyyy")</div>
+                            @if (ev.EventEndDate.HasValue)
+                            {
+                                <small class="text-muted">to @ev.EventEndDate.Value.ToString("dd MMM yyyy")</small>
+                            }
+                        </td>
+                        <td>@ev.Venue</td>
+                        <td>
+                            <div>@ev.RegistrationDeadline.ToString("dd MMM yyyy")</div>
+                            @if (DateTime.UtcNow.Date > ev.RegistrationDeadline.Date)
+                            {
+                                <span class="badge bg-danger">Closed</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Open</span>
+                            }
+                        </td>
+                        <td class="fw-bold">₹@ev.BaseFeeAmount.ToString("N0")</td>
+                        <td>
+                            @if (ev.IsActive)
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Archived</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="EditEvent" asp-route-id="@ev.EventId" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil me-1"></i>Configure
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

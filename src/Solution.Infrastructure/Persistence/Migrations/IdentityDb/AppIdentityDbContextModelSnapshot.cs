@@ -168,6 +168,12 @@ namespace Solution.Infrastructure.Persistence.Migrations.IdentityDb
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ActivationToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ActivationTokenExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -190,6 +196,12 @@ namespace Solution.Infrastructure.Persistence.Migrations.IdentityDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLoginAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -199,6 +211,9 @@ namespace Solution.Infrastructure.Persistence.Migrations.IdentityDb
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -218,6 +233,9 @@ namespace Solution.Infrastructure.Persistence.Migrations.IdentityDb
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServiceNo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
