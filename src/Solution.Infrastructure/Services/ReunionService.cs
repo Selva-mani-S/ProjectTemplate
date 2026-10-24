@@ -24,9 +24,24 @@ public class ReunionService : IReunionService
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<List<IafReunionEvent>> GetAllEventsAsync(CancellationToken ct = default)
+    public async Task<List<ReunionEventDto>> GetAllEventsAsync(CancellationToken ct = default)
     {
-        return await _db.ReunionEvents.OrderByDescending(e => e.EventDate).ToListAsync(ct);
+        return await _db.ReunionEvents
+            .OrderByDescending(e => e.EventDate)
+            .Select(e => new ReunionEventDto
+            {
+                EventId = e.EventId,
+                Title = e.Title,
+                Batch = e.Batch,
+                EventDate = e.EventDate,
+                EventEndDate = e.EventEndDate,
+                Venue = e.Venue,
+                RegistrationDeadline = e.RegistrationDeadline,
+                BaseFeeAmount = e.BaseFeeAmount,
+                IsActive = e.IsActive,
+                Description = e.Description
+            })
+            .ToListAsync(ct);
     }
 
     public async Task<bool> SaveEventAsync(ReunionEventDto dto, CancellationToken ct = default)

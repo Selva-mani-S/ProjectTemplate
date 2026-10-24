@@ -68,7 +68,7 @@ public static class ServiceCollectionExtensions
             options.Password.RequireLowercase = true;
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequireUppercase = true;
-            options.Password.RequiredLength = 12;
+            options.Password.RequiredLength = 8;
             options.Password.RequiredUniqueChars = 4;
 
             // Lockout settings (5 failed attempts, 15 minute lockout)

@@ -1,30 +1,36 @@
 namespace Solution.Web.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Solution.Application.Common.Interfaces;
 using Solution.Application.DTOs;
 using Solution.Domain.Entities;
+using Solution.Infrastructure.Identity;
 using Solution.Web.Models;
 
-[Authorize(Roles = "Administrator")]
+[Authorize]
 public class MemberRegistryController : Controller
 {
     private readonly IMemberService _memberService;
     private readonly IImportService _importService;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuditLogger _auditLogger;
 
     public MemberRegistryController(
         IMemberService memberService,
         IImportService importService,
+        UserManager<ApplicationUser> userManager,
         IAuditLogger auditLogger)
     {
         _memberService = memberService;
         _importService = importService;
+        _userManager = userManager;
         _auditLogger = auditLogger;
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Index(
         string? search = null,
         string? tradeId = null,
@@ -67,6 +73,7 @@ public class MemberRegistryController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Create()
     {
         var model = new MemberFormViewModel
@@ -79,6 +86,7 @@ public class MemberRegistryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MemberFormViewModel model)
     {
@@ -137,6 +145,12 @@ public class MemberRegistryController : Controller
     {
         if (string.IsNullOrWhiteSpace(id)) return NotFound();
 
+        var user = await _userManager.GetUserAsync(User);
+        if (!User.IsInRole(IdentityDataSeeder.AdminRole) && !string.Equals(user?.ServiceNo, id, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
         var m = await _memberService.GetMemberDetailsAsync(id);
         if (m == null) return NotFound();
 
@@ -170,6 +184,12 @@ public class MemberRegistryController : Controller
     public async Task<IActionResult> Edit(MemberFormViewModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        var user = await _userManager.GetUserAsync(User);
+        if (!User.IsInRole(IdentityDataSeeder.AdminRole) && !string.Equals(user?.ServiceNo, model.ServiceNo, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
 
         if (!ModelState.IsValid)
         {
@@ -217,6 +237,7 @@ public class MemberRegistryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string serviceNo)
     {
@@ -239,12 +260,14 @@ public class MemberRegistryController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrator")]
     public IActionResult Import()
     {
         return View(new MemberImportViewModel());
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Import(MemberImportViewModel model)
     {
@@ -264,6 +287,7 @@ public class MemberRegistryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfirmImport([FromBody] List<ImportRowDto> rows)
     {
@@ -287,6 +311,7 @@ public class MemberRegistryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DownloadErrorReport([FromBody] List<ImportRowDto> invalidRows)
     {
@@ -301,6 +326,12 @@ public class MemberRegistryController : Controller
     public async Task<IActionResult> AddFamily(AddFamilyMemberViewModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        var user = await _userManager.GetUserAsync(User);
+        if (!User.IsInRole(IdentityDataSeeder.AdminRole) && !string.Equals(user?.ServiceNo, model.ServiceNo, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
 
         if (!ModelState.IsValid)
         {
@@ -326,6 +357,12 @@ public class MemberRegistryController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveFamily(int familyMemberId, string serviceNo)
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (!User.IsInRole(IdentityDataSeeder.AdminRole) && !string.Equals(user?.ServiceNo, serviceNo, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
         await _memberService.RemoveFamilyMemberAsync(familyMemberId);
         TempData["SuccessMessage"] = "Family member removed.";
         return RedirectToAction(nameof(Details), new { id = serviceNo });
@@ -335,6 +372,12 @@ public class MemberRegistryController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadPhoto(string serviceNo, int photoIndex, IFormFile? photoFile)
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (!User.IsInRole(IdentityDataSeeder.AdminRole) && !string.Equals(user?.ServiceNo, serviceNo, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
         if (photoFile == null || photoFile.Length == 0)
         {
             TempData["ErrorMessage"] = "Please select an image file.";

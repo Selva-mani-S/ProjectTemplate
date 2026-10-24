@@ -1,77 +1,282 @@
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Indian Air Force Batch 1986 - Ruby Reunion & Member Portal";
+    var cspNonce = Context.Items[Solution.Web.Middleware.SecurityHeadersMiddleware.CspNonceKey]?.ToString() ?? string.Empty;
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border border-secondary border-opacity-25 text-center">
-            <div class="mb-3">
-                <i class="bi bi-airplane-engines text-primary" style="font-size: 3.5rem;"></i>
+<style nonce="@cspNonce">
+    .iaf-hero-card {
+        background: linear-gradient(135deg, #0b2545 0%, #134074 55%, #1d3557 100%);
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .iaf-hero-card::after {
+        content: "";
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .feature-card {
+        border-radius: 0.85rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+    }
+    .badge-gold {
+        background-color: #ffd166;
+        color: #0b2545;
+        font-weight: 700;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="iaf-hero-card text-white shadow p-4 p-md-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-inline-flex align-items-center gap-2 mb-3">
+                <span class="badge badge-gold px-3 py-2 text-uppercase fs-6">
+                    <i class="bi bi-award-fill me-1"></i>IAF Batch of 1986
+                </span>
+                <span class="badge bg-white bg-opacity-25 px-3 py-2 text-uppercase fs-6">
+                    Ruby Reunion &bull; 40 Glorious Years
+                </span>
             </div>
-            <h1 class="display-5 fw-bold text-dark">Indian Air Force Batch 1986</h1>
-            <p class="lead text-muted fs-4">Grand 40-Year Reunion & Member Registry Portal</p>
-            <p class="text-secondary max-w-75 mx-auto">
-                Welcome veterans, spouses, and families. This portal enables all IAF Batch 1986 course members to maintain their registry details, submit reunion travel and accommodation preferences, confirm event fee payments, and receive official event announcements.
+            <h1 class="display-4 fw-bold mb-2">Indian Air Force Batch 1986</h1>
+            <p class="fs-5 text-white-50 mb-4" style="max-width: 680px;">
+                <em>"Nabhaḥ Sparśaṁ Dīptam"</em> &mdash; Touch the Sky with Glory.<br />
+                The official reunion management registry and logistics portal for the batchmates of 1986, their spouses, and families.
             </p>
 
-            <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+            <div class="d-flex flex-wrap gap-3">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     @if (User.IsInRole("Administrator"))
                     {
-                        <a asp-controller="Dashboard" asp-action="Admin" class="btn btn-primary btn-lg px-4 gap-3 shadow-sm">
-                            <i class="bi bi-speedometer2 me-2"></i>Go to Admin Dashboard
+                        <a asp-controller="Dashboard" asp-action="Admin" class="btn btn-warning btn-lg px-4 fw-bold shadow-sm">
+                            <i class="bi bi-speedometer2 me-2"></i>Organizer Dashboard
                         </a>
-                        <a asp-controller="MemberRegistry" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                        <a asp-controller="MemberRegistry" asp-action="Index" class="btn btn-outline-light btn-lg px-4 shadow-sm">
                             <i class="bi bi-person-lines-fill me-2"></i>Member Registry
+                        </a>
+                        <a asp-controller="Reunion" asp-action="AdminList" class="btn btn-outline-light btn-lg px-4 shadow-sm">
+                            <i class="bi bi-calendar-check me-2"></i>Registrations
                         </a>
                     }
                     else
                     {
-                        <a asp-controller="Dashboard" asp-action="Member" class="btn btn-primary btn-lg px-4 gap-3 shadow-sm">
-                            <i class="bi bi-house-door me-2"></i>My Reunion Dashboard
+                        <a asp-controller="Dashboard" asp-action="Member" class="btn btn-warning btn-lg px-4 fw-bold shadow-sm">
+                            <i class="bi bi-house-door-fill me-2"></i>My Veteran Dashboard
                         </a>
-                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-warning btn-lg px-4 shadow-sm">
-                            <i class="bi bi-calendar-check me-2"></i>Register for Reunion
+                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-outline-light btn-lg px-4 shadow-sm">
+                            <i class="bi bi-clipboard-check me-2"></i>Register for Reunion
+                        </a>
+                        <a asp-controller="Payment" asp-action="Submit" class="btn btn-outline-light btn-lg px-4 shadow-sm">
+                            <i class="bi bi-credit-card me-2"></i>Reunion Fee Payment
                         </a>
                     }
                 }
                 else
                 {
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-5 shadow-sm">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Login to Your Account
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-warning btn-lg px-5 fw-bold shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Member Login
                     </a>
                 }
             </div>
         </div>
+        <div class="col-lg-4 text-center mt-4 mt-lg-0">
+            <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 backdrop-blur">
+                <i class="bi bi-airplane-engines-fill text-warning display-1 d-block mb-3"></i>
+                <h4 class="fw-bold mb-1">Grand Ruby Reunion</h4>
+                <div class="text-white-50 small mb-3">Chennai / Tambaram Air Force Station</div>
+                <div class="p-3 bg-white bg-opacity-10 rounded-3 text-start small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><i class="bi bi-calendar-event me-2 text-warning"></i>Event Dates:</span>
+                        <strong>20–22 Feb 2027</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><i class="bi bi-geo-alt me-2 text-warning"></i>Venue:</span>
+                        <strong>AF Officers Mess</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="bi bi-cash-coin me-2 text-warning"></i>Reunion Fee:</span>
+                        <strong>₹5,000 / member</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <div class="row g-4 py-2">
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary">
-                    <div class="card-body p-4 text-center">
-                        <div class="text-primary mb-3"><i class="bi bi-person-badge fs-1"></i></div>
-                        <h4 class="fw-bold">Member Registry</h4>
-                        <p class="text-muted small">Comprehensive database of all IAF 1986 batch comrades, trades, postings, and family records.</p>
-                    </div>
+<!-- Quick Statistics Bar -->
+<div class="row g-3 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 feature-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 me-3 fs-3">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase d-block">Batch Directory</span>
+                    <h4 class="fw-bold mb-0 text-dark">Member Registry</h4>
+                    <span class="text-muted small">Roster of all 1986 airmen</span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning">
-                    <div class="card-body p-4 text-center">
-                        <div class="text-warning mb-3"><i class="bi bi-compass fs-1"></i></div>
-                        <h4 class="fw-bold">Event & Travel Logistics</h4>
-                        <p class="text-muted small">Submit arrival times, transit points, accommodation requirements, T-shirt size, and catering preferences.</p>
-                    </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 feature-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="p-3 bg-success bg-opacity-10 text-success rounded-3 me-3 fs-3">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase d-block">Attendance</span>
+                    <h4 class="fw-bold mb-0 text-dark">RSVP Preferences</h4>
+                    <span class="text-muted small">Travel & guest count</span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-4 border-success">
-                    <div class="card-body p-4 text-center">
-                        <div class="text-success mb-3"><i class="bi bi-shield-check fs-1"></i></div>
-                        <h4 class="fw-bold">Fee Verification</h4>
-                        <p class="text-muted small">Transparent fee tracking with member self-reporting, payment proof submission, and organizer verification audit.</p>
-                    </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 feature-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3 me-3 fs-3">
+                    <i class="bi bi-shield-check"></i>
                 </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase d-block">Financials</span>
+                    <h4 class="fw-bold mb-0 text-dark">Fee Verification</h4>
+                    <span class="text-muted small">Audited UPI/Bank receipts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 feature-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="p-3 bg-info bg-opacity-10 text-info rounded-3 me-3 fs-3">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase d-block">Audit & Planning</span>
+                    <h4 class="fw-bold mb-0 text-dark">14 Data Reports</h4>
+                    <span class="text-muted small">Excel & CSV downloads</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Core Portal Modules Grid -->
+<div class="mb-5">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold text-dark">Comprehensive Reunion Operations</h3>
+        <p class="text-muted">Built specifically for the coordination committee and all batchmates.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                <div class="text-primary fs-2 mb-3"><i class="bi bi-person-lines-fill"></i></div>
+                <h5 class="fw-bold text-dark">Member Registry & Profiles</h5>
+                <p class="text-muted small mb-3">
+                    Complete records of Batch 1986 veterans with service numbers, trades (Radar, Signals, Electrical, etc.), home states, contact details, technical skills, achievements, and 5-slot photograph albums.
+                </p>
+                <div class="mt-auto">
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-controller="MemberRegistry" asp-action="Index" class="btn btn-sm btn-outline-primary fw-bold">Explore Registry &rarr;</a>
+                    }
+                    else if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Dashboard" asp-action="Member" class="btn btn-sm btn-outline-primary fw-bold">View My Profile &rarr;</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                <div class="text-warning fs-2 mb-3"><i class="bi bi-signpost-split-fill"></i></div>
+                <h5 class="fw-bold text-dark">Travel, Logistics & Souvenirs</h5>
+                <p class="text-muted small mb-3">
+                    Members can specify arrival/departure dates, pickup points (Airport, Egmore, Central, Tambaram), Mess or Hotel accommodation, T-shirt sizes (M, L, XL, XXL), and dietary preferences.
+                </p>
+                <div class="mt-auto">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Reunion" asp-action="Register" class="btn btn-sm btn-outline-warning fw-bold">Submit Preferences &rarr;</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                <div class="text-success fs-2 mb-3"><i class="bi bi-cash-stack"></i></div>
+                <h5 class="fw-bold text-dark">Transparent Fee Verification</h5>
+                <p class="text-muted small mb-3">
+                    Veterans confirm payments with UPI/UTR references and receipt uploads. Organizers independently verify and audit collections with duplicate acknowledgement protection.
+                </p>
+                <div class="mt-auto">
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-controller="Payment" asp-action="AdminList" class="btn btn-sm btn-outline-success fw-bold">Audit Collections &rarr;</a>
+                    }
+                    else if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Payment" asp-action="Submit" class="btn btn-sm btn-outline-success fw-bold">Submit Payment &rarr;</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Four-Step Reunion Workflow -->
+<div class="card border-0 shadow-sm p-4 p-md-5 mb-5 bg-white">
+    <div class="text-center mb-4">
+        <span class="badge bg-primary px-3 py-2 text-uppercase mb-2">Step-by-Step Guide</span>
+        <h3 class="fw-bold text-dark">How to Participate in the Reunion</h3>
+    </div>
+
+    <div class="row g-4 text-center">
+        <div class="col-md-3">
+            <div class="p-3 border rounded-3 bg-light h-100">
+                <div class="fs-1 fw-bold text-primary mb-2">1</div>
+                <h6 class="fw-bold text-dark">Activate Account</h6>
+                <p class="text-muted small mb-0">Use your unique activation link to establish your password and log into your veteran portal.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 border rounded-3 bg-light h-100">
+                <div class="fs-1 fw-bold text-primary mb-2">2</div>
+                <h6 class="fw-bold text-dark">Submit Preferences</h6>
+                <p class="text-muted small mb-0">Provide arrival itinerary, guest counts, accommodation requirements, and T-shirt size.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 border rounded-3 bg-light h-100">
+                <div class="fs-1 fw-bold text-primary mb-2">3</div>
+                <h6 class="fw-bold text-dark">Confirm Fee Payment</h6>
+                <p class="text-muted small mb-0">Transfer the reunion fee via UPI or bank transfer and record your transaction reference.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 border rounded-3 bg-light h-100">
+                <div class="fs-1 fw-bold text-success mb-2">4</div>
+                <h6 class="fw-bold text-dark">Grand Gathering</h6>
+                <p class="text-muted small mb-0">Join your batchmates in Chennai for 3 days of celebration, nostalgia, and re-connecting.</p>
             </div>
         </div>
     </div>

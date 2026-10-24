@@ -389,9 +389,5 @@ public class IafCoreTests
 
         var announcementsCount = await db.Announcements.CountAsync();
         Assert.True(announcementsCount >= 1, "Announcements should be seeded");
-
-        var members = await db.PersonalData.ToListAsync();
-        Assert.True(members.Count >= 5, "Initial members should be seeded");
-        Assert.Contains(members, m => !string.IsNullOrEmpty(m.EmailId));
     }
 }

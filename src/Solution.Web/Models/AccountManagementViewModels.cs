@@ -16,7 +16,7 @@ public class ActivateAccountViewModel
     public string? MemberName { get; set; }
 
     [Required(ErrorMessage = "Password is required.")]
-    [StringLength(100, MinimumLength = 12, ErrorMessage = "Password must be at least 12 characters.")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
     [DataType(DataType.Password)]
     [Display(Name = "Choose Password")]
     public string Password { get; set; } = string.Empty;
