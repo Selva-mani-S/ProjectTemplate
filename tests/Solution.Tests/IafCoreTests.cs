@@ -1,6 +1,7 @@
 namespace Solution.Tests;
 
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,9 +17,12 @@ public class IafCoreTests
     private static ServiceProvider CreateTestServiceProvider()
     {
         var services = new ServiceCollection();
+        string id = Guid.NewGuid().ToString("N");
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["UseInMemoryDatabase"] = "true"
+            ["UseInMemoryDatabase"] = "true",
+            ["InMemoryDbName"] = $"Db_{id}",
+            ["InMemoryIdentityDbName"] = $"IdDb_{id}"
         }).Build();
 
         services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Warning));
@@ -50,6 +54,7 @@ public class IafCoreTests
             TradeId = "RA",
             StateId = "TN",
             MobileNo = "9876543210",
+            EmailId = "rajesh.kumar@iaf1986.local",
             TechnicalSkills = "Radar Systems",
             PlacesWorked = "Tambaram, Bareilly",
             Achievements = "Commendation by AOC-in-C",
@@ -65,6 +70,7 @@ public class IafCoreTests
         Assert.Equal("Sgt Rajesh Kumar", member.Name);
         Assert.Equal("Radar Fitters", member.TradeName);
         Assert.Equal("Tamil Nadu", member.StateName);
+        Assert.Equal("rajesh.kumar@iaf1986.local", member.EmailId);
 
         // Add Family Member
         bool famAdded = await memberService.AddFamilyMemberAsync(new FamilyMemberDto
@@ -342,5 +348,50 @@ public class IafCoreTests
             string csvText = Encoding.UTF8.GetString(csvBytes);
             Assert.False(string.IsNullOrWhiteSpace(csvText), $"Report {reportNo} CSV generated blank text");
         }
+    }
+
+    [Fact]
+    public async Task DbInitializer_SeedsAllInitialData_Successfully()
+    {
+        var services = new ServiceCollection();
+        string id = Guid.NewGuid().ToString("N");
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["UseInMemoryDatabase"] = "true",
+            ["InMemoryDbName"] = $"Db_{id}",
+            ["InMemoryIdentityDbName"] = $"IdDb_{id}"
+        }).Build();
+
+        services.AddLogging();
+        services.AddInfrastructureServices(config);
+        services.AddSecurityAndIdentityServices();
+        services.AddApplicationServices();
+
+        using var sp = services.BuildServiceProvider();
+
+        // Run initializers
+        await DbInitializer.InitializeAsync(sp);
+        await Solution.Infrastructure.Identity.IdentityDataSeeder.SeedAdminUserAsync(sp);
+
+        using var scope = sp.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // Verify initial data was seeded
+        var tradesCount = await db.Trades.CountAsync();
+        Assert.True(tradesCount >= 12, "Trades should be seeded");
+
+        var statesCount = await db.States.CountAsync();
+        Assert.True(statesCount >= 28, "States should be seeded");
+
+        var activeEvent = await db.ReunionEvents.FirstOrDefaultAsync(e => e.IsActive);
+        Assert.NotNull(activeEvent);
+        Assert.Equal("1986", activeEvent.Batch);
+
+        var announcementsCount = await db.Announcements.CountAsync();
+        Assert.True(announcementsCount >= 1, "Announcements should be seeded");
+
+        var members = await db.PersonalData.ToListAsync();
+        Assert.True(members.Count >= 5, "Initial members should be seeded");
+        Assert.Contains(members, m => !string.IsNullOrEmpty(m.EmailId));
     }
 }

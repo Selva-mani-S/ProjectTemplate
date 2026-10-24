@@ -41,7 +41,8 @@ public class MemberService : IMemberService
             query = query.Where(p =>
                 p.ServiceNo.Contains(s) ||
                 p.Name.Contains(s) ||
-                (p.MobileNo != null && p.MobileNo.Contains(s)));
+                (p.MobileNo != null && p.MobileNo.Contains(s)) ||
+                (p.EmailId != null && p.EmailId.Contains(s)));
         }
 
         if (!string.IsNullOrWhiteSpace(tradeId))
@@ -99,6 +100,7 @@ public class MemberService : IMemberService
                 StateId = m.StateId,
                 StateName = m.State?.StateName,
                 MobileNo = m.MobileNo,
+                EmailId = m.EmailId,
                 HasUserAccount = hasUser,
                 IsAccountActive = isActive,
                 HasRegisteredForReunion = latestReunion != null,
@@ -142,6 +144,7 @@ public class MemberService : IMemberService
             StateId = m.StateId,
             StateName = m.State?.StateName,
             MobileNo = m.MobileNo,
+            EmailId = m.EmailId,
             TechnicalSkills = m.TechnicalSkills,
             PlacesWorked = m.PlacesWorked,
             AdditionalDetails = m.AdditionalDetails,
@@ -244,6 +247,7 @@ public class MemberService : IMemberService
             Address2 = dto.Address2,
             StateId = dto.StateId,
             MobileNo = dto.MobileNo,
+            EmailId = dto.EmailId?.Trim(),
             TechnicalSkills = dto.TechnicalSkills,
             PlacesWorked = dto.PlacesWorked,
             AdditionalDetails = dto.AdditionalDetails,
@@ -274,6 +278,7 @@ public class MemberService : IMemberService
         m.Address2 = dto.Address2;
         m.StateId = dto.StateId;
         m.MobileNo = dto.MobileNo;
+        m.EmailId = dto.EmailId?.Trim();
         m.TechnicalSkills = dto.TechnicalSkills;
         m.PlacesWorked = dto.PlacesWorked;
         m.AdditionalDetails = dto.AdditionalDetails;

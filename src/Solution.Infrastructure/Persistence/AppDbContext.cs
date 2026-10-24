@@ -74,6 +74,7 @@ public class AppDbContext : DbContext, IDataProtectionKeyContext
             entity.Property(e => e.Address2).HasMaxLength(50);
             entity.Property(e => e.StateId).HasMaxLength(2).IsUnicode(false);
             entity.Property(e => e.MobileNo).HasMaxLength(13);
+            entity.Property(e => e.EmailId).HasMaxLength(150);
             entity.Property(e => e.TechnicalSkills).HasMaxLength(250);
             entity.Property(e => e.PlacesWorked).HasMaxLength(250);
             entity.Property(e => e.AdditionalDetails).HasMaxLength(250);

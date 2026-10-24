@@ -56,6 +56,7 @@ public class MemberAccountController : Controller
                 ServiceNo = m.ServiceNo,
                 MemberName = m.Name,
                 MobileNo = m.MobileNo,
+                MemberEmailId = m.EmailId,
                 TradeName = m.Trade?.TradeName,
                 HasAccount = hasAcc,
                 Email = u?.Email,
@@ -151,7 +152,9 @@ public class MemberAccountController : Controller
         {
             if (existingServiceNos.Contains(m.ServiceNo)) continue;
 
-            string email = $"{m.ServiceNo.ToLowerInvariant()}@iaf1986.local";
+            string email = !string.IsNullOrWhiteSpace(m.EmailId)
+                ? m.EmailId.Trim().ToLowerInvariant()
+                : $"{m.ServiceNo.ToLowerInvariant()}@iaf1986.local";
             string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
             string tempPass = "Tmp!" + Convert.ToHexString(RandomNumberGenerator.GetBytes(8)) + "9aA";
 

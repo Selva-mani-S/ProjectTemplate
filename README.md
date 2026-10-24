@@ -85,12 +85,7 @@ dotnet tool install --global dotnet-ef
 
 ```bash
 # Add Initial Migration for AppDbContext
-dotnet ef migrations add InitialAppDb \
-  --project src/Solution.Infrastructure/Solution.Infrastructure.csproj \
-  --startup-project src/Solution.Web/Solution.Web.csproj \
-  --context Solution.Infrastructure.Persistence.AppDbContext \
-  --output-dir Persistence/Migrations/AppDb
-
+dotnet ef migrations add InitialAppDb --project src/Solution.Infrastructure/Solution.Infrastructure.csproj --startup-project src/Solution.Web/Solution.Web.csproj --context Solution.Infrastructure.Persistence.AppDbContext --output-dir Persistence/Migrations/AppDb
 # Update Database for AppDbContext
 dotnet ef database update  --project src/Solution.Infrastructure/Solution.Infrastructure.csproj --startup-project src/Solution.Web/Solution.Web.csproj --context Solution.Infrastructure.Persistence.AppDbContext
 

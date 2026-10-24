@@ -62,6 +62,11 @@ public class MemberFormViewModel
     [Display(Name = "Mobile Number")]
     public string? MobileNo { get; set; }
 
+    [StringLength(150)]
+    [EmailAddress]
+    [Display(Name = "Email Address")]
+    public string? EmailId { get; set; }
+
     [StringLength(250)]
     [Display(Name = "Technical Skills")]
     public string? TechnicalSkills { get; set; }

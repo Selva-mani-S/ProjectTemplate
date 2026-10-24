@@ -48,6 +48,7 @@ BEGIN
         Address2 VARCHAR(50) NULL,
         StateID VARCHAR(2) NULL,
         MobileNo VARCHAR(13) NULL,
+        EmailId VARCHAR(150) NULL,
         TechnicalSkills VARCHAR(250) NULL,
         PlacesWorked VARCHAR(250) NULL,
         AdditionalDetails VARCHAR(250) NULL,

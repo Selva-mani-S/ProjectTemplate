@@ -320,6 +320,10 @@ namespace Solution.Infrastructure.Persistence.Migrations.AppDb
                     b.Property<DateTime?>("Dod")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("EmailId")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<string>("MobileNo")
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");

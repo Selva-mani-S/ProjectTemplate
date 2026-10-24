@@ -11,6 +11,7 @@ public class IafPersonalData
     public string? Address2 { get; set; }
     public string? StateId { get; set; }
     public string? MobileNo { get; set; }
+    public string? EmailId { get; set; }
     public string? TechnicalSkills { get; set; }
     public string? PlacesWorked { get; set; }
     public string? AdditionalDetails { get; set; }

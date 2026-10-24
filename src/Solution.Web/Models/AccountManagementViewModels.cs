@@ -37,6 +37,7 @@ public class MemberAccountItemDto
     public string ServiceNo { get; set; } = string.Empty;
     public string MemberName { get; set; } = string.Empty;
     public string? MobileNo { get; set; }
+    public string? MemberEmailId { get; set; }
     public string? TradeName { get; set; }
     public bool HasAccount { get; set; }
     public string? Email { get; set; }

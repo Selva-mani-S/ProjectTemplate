@@ -46,18 +46,23 @@
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label asp-for="Dob" class="form-label fw-bold small"></label>
                             <input asp-for="Dob" class="form-control" type="date" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label asp-for="Dod" class="form-label fw-bold small"></label>
                             <input asp-for="Dod" class="form-control" type="date" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label asp-for="MobileNo" class="form-label fw-bold small"></label>
                             <input asp-for="MobileNo" class="form-control" placeholder="e.g. +919876543210" maxlength="13" />
                             <span asp-validation-for="MobileNo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="EmailId" class="form-label fw-bold small"></label>
+                            <input asp-for="EmailId" class="form-control" type="email" placeholder="veteran@domain.com" maxlength="150" />
+                            <span asp-validation-for="EmailId" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">

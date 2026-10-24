@@ -25,11 +25,14 @@ public static class ServiceCollectionExtensions
 
         if (useInMemory)
         {
+            string dbName = configuration["InMemoryDbName"] ?? "BaselineSecureDb";
+            string identityDbName = configuration["InMemoryIdentityDbName"] ?? "BaselineSecureIdentityDb";
+
             services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase("BaselineSecureDb"));
+                options.UseInMemoryDatabase(dbName));
 
             services.AddDbContext<AppIdentityDbContext>(options =>
-                options.UseInMemoryDatabase("BaselineSecureIdentityDb"));
+                options.UseInMemoryDatabase(identityDbName));
         }
         else
         {

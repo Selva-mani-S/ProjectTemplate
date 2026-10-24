@@ -9,6 +9,7 @@ public class MemberSummaryDto
     public string? StateId { get; set; }
     public string? StateName { get; set; }
     public string? MobileNo { get; set; }
+    public string? EmailId { get; set; }
     public bool HasUserAccount { get; set; }
     public bool IsAccountActive { get; set; }
     public bool HasRegisteredForReunion { get; set; }
@@ -29,6 +30,7 @@ public class MemberDetailsDto
     public string? StateId { get; set; }
     public string? StateName { get; set; }
     public string? MobileNo { get; set; }
+    public string? EmailId { get; set; }
     public string? TechnicalSkills { get; set; }
     public string? PlacesWorked { get; set; }
     public string? AdditionalDetails { get; set; }
@@ -69,6 +71,7 @@ public class CreateMemberDto
     public string? Address2 { get; set; }
     public string? StateId { get; set; }
     public string? MobileNo { get; set; }
+    public string? EmailId { get; set; }
     public string? TechnicalSkills { get; set; }
     public string? PlacesWorked { get; set; }
     public string? AdditionalDetails { get; set; }

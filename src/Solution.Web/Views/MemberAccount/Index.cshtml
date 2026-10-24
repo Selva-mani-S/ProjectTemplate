@@ -131,6 +131,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary btn-provision"
                                             data-serviceno="@acc.ServiceNo"
                                             data-name="@acc.MemberName"
+                                            data-email="@acc.MemberEmailId"
                                             data-bs-toggle="modal"
                                             data-bs-target="#provisionModal">
                                         <i class="bi bi-person-plus me-1"></i>Provision
@@ -233,9 +234,10 @@
                 btn.addEventListener('click', function () {
                     var serviceNo = this.getAttribute('data-serviceno');
                     var name = this.getAttribute('data-name');
+                    var email = this.getAttribute('data-email');
                     document.getElementById('modalServiceNo').value = serviceNo;
                     document.getElementById('modalMemberDisplay').value = name + ' (' + serviceNo + ')';
-                    document.getElementById('modalEmail').value = serviceNo.toLowerCase() + '@@iaf1986.local';
+                    document.getElementById('modalEmail').value = (email && email.trim().length > 0) ? email.trim() : (serviceNo.toLowerCase() + '@@iaf1986.local');
                 });
             });
 

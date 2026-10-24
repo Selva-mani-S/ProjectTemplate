@@ -58,5 +58,29 @@ public static class IdentityDataSeeder
                 await userManager.AddToRoleAsync(adminUser, AdminRole).ConfigureAwait(false);
             }
         }
+
+        const string memberEmail = "veteran@iaf1986.local";
+        ApplicationUser? memberUser = await userManager.FindByEmailAsync(memberEmail).ConfigureAwait(false);
+        if (memberUser == null)
+        {
+            memberUser = new ApplicationUser
+            {
+                UserName = memberEmail,
+                Email = memberEmail,
+                FirstName = "Rajesh",
+                LastName = "Kumar",
+                Department = "IAF 1986 Batch",
+                ServiceNo = "661234",
+                EmailConfirmed = true,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
+            };
+
+            IdentityResult result = await userManager.CreateAsync(memberUser, "VeteranP@ssw0rd123!").ConfigureAwait(false);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(memberUser, MemberRole).ConfigureAwait(false);
+            }
+        }
     }
 }
